@@ -1,0 +1,145 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+#
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+#
+# Modified to make a template file for a multi-binary package with separated
+# build-arch and build-indep targets  by Bill Allombert 2001
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+#export DH_COMPAT=5
+export PACKAGE=EDRcoin
+export BUILD_ROOT=%BUILD_ROOT%
+export rootdir=%rootdir%
+export JFLAG=%JFLAG%
+export OUTPUT_ROOT=%OUTPUT_ROOT%
+export VERSION_MINOR=%VERSION_MINOR%
+export VERSION_MAJOR=%VERSION_MAJOR%
+export VERSION_MICRO=%VERSION_MICRO%
+export VERSION_BUILD=%VERSION_BUILD%
+export PROJECT_ROOT=%PROJECT_ROOT%
+export RELEASE_TYPE=%RELEASE_TYPE%
+export dist=%dist%
+
+#ifeq (%ARCH_LEVEL%,x86_64)
+#	_libdir=/usr/lib64
+#else
+        _libdir=/usr/lib
+#endif
+
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	# Add here commands to configure the package.
+#	test -f $(rootdir)/dont_configure || ( cd $(BUILD_ROOT) && $(SH) ./configure.sh )
+	qmake -r /mnt/projects/EDRcoin/EDRcoin-qt.pro
+	touch configure-stamp
+
+
+#Architecture
+build: build-arch build-indep
+
+build-arch: build-arch-stamp
+build-arch-stamp: configure-stamp  
+
+	# Add here commands to compile the arch part of the package.
+#	( cd $(BUILD_ROOT) && $(MAKE) -j$(JFLAG) )
+	$(MAKE)
+	touch $@
+
+build-indep: build-indep-stamp
+build-indep-stamp: configure-stamp  
+
+	# Add here commands to compile the indep part of the package.
+	#$(MAKE) doc
+	touch $@
+
+clean: 
+	dh_testdir
+	dh_testroot
+	rm -f build-arch-stamp build-indep-stamp configure-stamp
+
+	# Add here commands to clean up after the build process.
+#	test -f $(rootdir)/dont_clean || rm -rf $(OUTPUT_ROOT)
+	test -f Makefile && make clean
+
+	dh_clean 
+
+install: install-indep install-arch
+
+install-indep:
+	dh_testdir
+	dh_testroot
+	test ! -f /usr/bin/dh_prep || dh_prep -i 
+	dh_installdirs -i
+
+	dh_install -i
+
+install-arch:
+	dh_testdir
+	dh_testroot
+	test ! -f /usr/bin/dh_prep || dh_prep -s 
+	dh_installdirs -s
+
+	# Add here commands to install the arch part of the package into
+	# debian/tmp.
+
+	$(MAKE) INSTALL_ROOT=$(CURDIR)/debian/$(PACKAGE) install
+#	buildroot=$(CURDIR)/debian/$(PACKAGE) /bin/sh ./mkmenu.sh
+
+	dh_install -s
+# Must not depend on anything. This is to be called by
+# binary-arch/binary-indep
+# in another 'make' thread.
+binary-common:
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs 
+	dh_installdocs
+	dh_installexamples
+	dh_installmenu
+#	dh_installdebconf
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_python
+#	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+#	dh_installman
+	dh_link
+	dh_strip
+#	dh_compress
+	dh_fixperms
+#	dh_perl
+	dh_makeshlibs
+	dh_installdeb
+# Excluding qt opengl because custom qt builds sometimes links with vendor openg lib.
+	dh_shlibdeps -L$(PACKAGE) -l${PWD}/debian/$(PACKAGE)$(_libdir)/$(PACKAGE)/EDRcoin-qt
+# -X libQtOpenGL.so.*
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+# Build architecture independant packages using the common target.
+binary-indep: build-indep install-indep
+	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
+
+# Build architecture dependant packages using the common target.
+binary-arch: build-arch install-arch
+	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
+
+binary: binary-arch binary-indep
+
+.PHONY: clean configure build binary install 
+

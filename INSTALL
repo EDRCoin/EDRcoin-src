@@ -1,0 +1,9 @@
+Building EDRcoin
+
+See doc/readme-qt.rst for instructions on building EDRcoin QT,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of EDRcoin.
+
+See doc/build-*.txt for instructions on building EDRcoind,
+the intended-for-services, no-graphical-interface, reference
+implementation of EDRcoin.

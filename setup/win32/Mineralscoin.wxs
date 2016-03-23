@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<?define ProductVersion = "1.0.5"?>
+<?define ProductUpgradeCode = "69BD1A8F-77B9-499A-A7B1-F040613BE0CA"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+   <Product Id="*" UpgradeCode="$(var.ProductUpgradeCode)" 
+            Name="EDRcoin Wallet" Version="$(var.ProductVersion)" Manufacturer="EDRcoin" Language="1033">
+      <Package InstallerVersion="200" Compressed="yes" Comments="EDRcoin Wallet installer"/>
+      <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
+      <Icon Id="ProductIcon" SourceFile="bitcoin.ico"/>
+      <Property Id="ARPPRODUCTICON" Value="ProductIcon"/>
+      <Property Id="ARPHELPLINK" Value="http://EDRcoin.pro/"/>
+      <Property Id="ARPURLINFOABOUT" Value="http://EDRcoin.pro/"/>
+      <!--
+      <Property Id="ARPNOREPAIR" Value="1"/>
+      <Property Id="ARPNOMODIFY" Value="1"/>
+      -->
+      <Upgrade Id="$(var.ProductUpgradeCode)">
+         <UpgradeVersion Minimum="$(var.ProductVersion)" OnlyDetect="yes" Property="NEWERVERSIONDETECTED"/>
+         <UpgradeVersion Minimum="0.0.0" Maximum="$(var.ProductVersion)" IncludeMinimum="yes" IncludeMaximum="no" 
+                         Property="OLDERVERSIONBEINGUPGRADED"/>   
+      </Upgrade>
+      <Condition Message="A newer version of this software is already installed.">NOT NEWERVERSIONDETECTED</Condition>
+ 
+      <Directory Id="TARGETDIR" Name="SourceDir">
+         <Directory Id="ProgramFilesFolder">
+            <Directory Id="INSTALLDIR" Name="EDRcoin">
+               <Component Id="exe" Guid="EA64E9AD-4FC8-484D-9FF4-EC6EB711B817">
+                  <File Id="exe" Source="src/EDRcoin-qt.exe"/>
+               </Component>
+               <Component Id="icudt52" Guid="D7E7684A-C069-47E7-9CD0-9C628776947E">
+                  <File Id="icudt52" Source="src/icudt52.dll"/>
+               </Component>
+               <Component Id="icuin52" Guid="ABB7AF2B-6762-4FCC-A509-15E6672FBA49">
+                  <File Id="icuin52" Source="src/icuin52.dll"/>
+               </Component>
+               <Component Id="icuuc52" Guid="EBAD577F-A103-4EC3-9BF5-127E107563D1">
+                  <File Id="icuuc52" Source="src/icuuc52.dll"/>
+               </Component>
+               <Component Id="gccrt" Guid="F40000B3-CB7A-4B3A-B5AD-4AAFFFD6EC8A">
+                  <File Id="gccrt" Source="src/libgcc_s_dw2-1.dll"/>
+               </Component>
+               <Component Id="stdc" Guid="3A372628-163D-42FD-B3D7-49D0380C68F3">
+                  <File Id="stdc" Source="src/libstdc++-6.dll"/>
+               </Component>
+               <Component Id="pthread" Guid="D958388A-B54D-448A-88BA-4D6083145DC2">
+                  <File Id="pthread" Source="src/libwinpthread-1.dll"/>
+               </Component>
+               <Component Id="Qt5Core" Guid="BE381F86-69B5-41A5-9735-00ED8ADC2064">
+                  <File Id="Qt5Core" Source="src/Qt5Core.dll"/>
+               </Component>
+               <Component Id="Qt5Gui" Guid="1971D5B0-F7A0-4E01-8516-2112BBA72B64">
+                  <File Id="Qt5Gui" Source="src/Qt5Gui.dll"/>
+               </Component>
+               <Component Id="Qt5Widgets" Guid="E4236B78-E181-41EB-A3F9-BB199B77A5D0">
+                  <File Id="Qt5Widgets" Source="src/Qt5Widgets.dll"/>
+               </Component>
+              <Directory Id="imageformats" Name="imageformats">
+                <Component Id="qico" Guid="286D9358-8512-4A13-BCAC-2324F6D50828">
+                  <File Id="qico" Source="src/imageformats/qico.dll"/>
+                </Component>
+                <Component Id="qsvg" Guid="66D478D1-CFF7-41F0-9D59-DCC02DEEAC51">
+                  <File Id="qsvg" Source="src/imageformats/qsvg.dll"/>
+                </Component>
+              </Directory>
+              <Directory Id="platforms" Name="platforms" >
+                <Component Id="qwindows" Guid="4ABD6BF2-AB18-43DA-A43C-F3727567A0D5">
+                  <File Id="qwindows" Source="src/platforms/qwindows.dll"/>
+                </Component>
+              </Directory>
+            </Directory>
+         </Directory>
+ 
+         <Directory Id="ProgramMenuFolder">
+            <Directory Id="ProgramMenuSubfolder" Name="EDRcoin">
+               <Component Id="ApplicationShortcuts" Guid="4EF3A479-14F2-4DD1-A51D-09B9C3CDB2EB">
+                  <Shortcut Id="ApplicationShortcut1" Name="EDRcoin" Description="Start EDRcoin Wallet" 
+                            Target="[INSTALLDIR]EDRcoin-qt.exe" WorkingDirectory="INSTALLDIR"/>
+                  <RegistryValue Root="HKCU" Key="Software\EDRcoin\EDRcoin" 
+                            Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+                  <RemoveFolder Id="ProgramMenuSubfolder" On="uninstall"/>
+               </Component>
+            </Directory>
+         </Directory>
+      </Directory>
+ 
+      <InstallExecuteSequence>
+         <RemoveExistingProducts After="InstallValidate"/>
+      </InstallExecuteSequence>
+ 
+      <Feature Id="DefaultFeature" Level="1">
+         <ComponentRef Id="exe"/>
+         <ComponentRef Id="icudt52"/>
+         <ComponentRef Id="icuin52"/>
+         <ComponentRef Id="icuuc52" />
+         <ComponentRef Id="gccrt" />
+         <ComponentRef Id="stdc" />
+         <ComponentRef Id="pthread" />
+         <ComponentRef Id="Qt5Core" />
+         <ComponentRef Id="Qt5Gui" />
+         <ComponentRef Id="Qt5Widgets" />
+         <ComponentRef Id="qico" />
+         <ComponentRef Id="qsvg" />
+         <ComponentRef Id="qwindows" />
+         <ComponentRef Id="ApplicationShortcuts"/>     
+      </Feature>
+   </Product>
+</Wix>
